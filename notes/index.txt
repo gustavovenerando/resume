@@ -1,0 +1,66 @@
+- Líder de um time com 2 web developers juniores, sendo reposável pela plataforma "Report".
+
+- Desenvolvimento e implementação de projetos como agendamento de relatórios,
+  cacheamento automático e proposta comercial.
+
+  - "Agendamentos Automáticos": Cacheamento previo para D-1 de relatorios para extrações
+  mais rápidas aos clientes (Uma vez que nao havia cache para dia atual). Estudo for
+  realizado para verificar quais clientes usavam muito D-1 e quais necessitavam 
+  - Cron de novos agendamentos - Pega as informações de novos agendamentos feitos via
+  front (nao possuem o campo sendingData) com as informações (dia e horario de
+  envio, frequencia) e gera novo horários de envio 
+  - Cron de processamento:
+  Analisa o horarios de envio e processa os relatórios e salva o arquivo gerado
+  na maquina e o caminho do mesmo no banco em "report_file". 
+  - Cron de envio:
+  Verifica os relatorios prontos para serem enviados. Ou seja, apos o
+  processamento, pega os agendamentos cujo objeto da model "report_file" nao
+  possuei o campo "sentAt". Ou seja, procura pelos agendamentos que ja foram
+  processados mas cujo arquivo gerado pelo processamento nao tenha sido enviado
+  ainda. Cron envia emails conforme esses critérios. 
+  - Cron de limpeza: Verifica
+  os arquivos (files) que ja foram enviados e apaga do banco e da máquina. Maior
+  desafio: Lidar com fuso horários e datas em js
+
+  - Proposta comercial: 
+  Projeto começou durante minha breve atuacao como lider do time "Admin" e atuando nele
+  mesmo apos ser lider do "Report". 
+  Projeto tem como objetivo remodelar o sistema de
+  contração e aquisicao de clientes, por meio de onboarding (conta teste temporaria e
+  tuturial interativo)
+  Aprimorar e motivar as vendas por meio de politicas comercias, com atribuição de
+  descontos dispobilizados pelos time de vendas. Estas politicas comerciais sao
+  implementadas no modelo dos produtos, ativando estes descontos.
+  Alem disso, o projeto tambem propoe aprimorar a experiencia do cliente com uma
+  interface para controlar todos os produtos e licencas adiquiridos.
+  Deste modo, o projeto envolveu a remodelagem da estrutura interna de administração de
+  clientes e produtos.
+  Cliente faz uma proposta pela nova interface, a proposta sendo aprovada ela popula a
+  collection dos produtos dos clientes (pbx.product.clients). Agora, os produtos foram
+  atualizados no front.
+
+
+- Estruturação e desenvolvimento da refatoração da api para TypeScript, seguindo
+  Clean Arquitecture e Domain Driven Design, envolvendo a remodelagem e
+  padronização do sistema de cacheamento (para todos os reports), implementação de
+  testes e documentação.
+
+
+Time responsavel pela plataforma por realizar operações ETL e Caching. Lidando com multi-threading para lidar com processamentos extensivos e concorrencia de processos para mesmo dias.
+Experiencia com multi-threading
+Consertei bug no load balance das threads, ocasionando em melhora de 14% no tempo médio de requests
+Implementação de melhorias no load balance das threads, resultando em uma redução de 14% no tempo médio das requisições.
+
+Load balance:
+Antes -> Considerava o acumulado de todos os processos de cada thread para ver qual thread tinha menos "requests" ou seja, processou menos (dias). Neste cenário, mesmo que uma thread esteja disponivel (sem processos no momento), se ela tiver mais processos no histórico (chave "requests") ela não seria selecionada para tratar o próximo processo (dia). A diferença na quantidades de processos de cada thread ocorre pois um dia pode demorar mais que outro para ser processado, uma vez que pode ter mais eventos no dia.
+Agora -> Os processos são excluidos da chave "requests" de cada thread quando o mesmo é concluido. Assim, o load balance pega os que estão realmente disponiveis no momento
+
+api -> x workers (clusters)
+worker -> y threads (child process)
+
+Cada request pega um periodo para ser extraido
+O processamento é feito dia a dia
+Cada processamento (dia) é "despachado" para uma thread (via load balance)
+Cada thread lida com apenas um dia
+Caso todas as threads estejam ocupadas, o dia é despachado para outro worker (cluster) e o mesmo despacha para uma thread
+Caso muitas threads estejam ocupadas e este looping de ficar mandando para outros workers demorar muito, request dá timeout
