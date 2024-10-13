@@ -48,8 +48,10 @@
 
 Time responsavel pela plataforma por realizar operações ETL e Caching. Lidando com multi-threading para lidar com processamentos extensivos e concorrencia de processos para mesmo dias.
 Experiencia com multi-threading
-Consertei bug no load balance das threads, ocasionando em melhora de 14% no tempo médio de requests
-Implementação de melhorias no load balance das threads, resultando em uma redução de 14% no tempo médio das requisições.
+Implementação de melhoria no load balance das threads, otimizando o gerenciamento de
+tarefas em cenários de muita carga.
+Implementação de melhoria no load balance das threads, evitando que tarefas demorassem
+para ser processadas em cenários de alta carga.
 
 Load balance:
 Antes -> Considerava o acumulado de todos os processos de cada thread para ver qual thread tinha menos "requests" ou seja, processou menos (dias). Neste cenário, mesmo que uma thread esteja disponivel (sem processos no momento), se ela tiver mais processos no histórico (chave "requests") ela não seria selecionada para tratar o próximo processo (dia). A diferença na quantidades de processos de cada thread ocorre pois um dia pode demorar mais que outro para ser processado, uma vez que pode ter mais eventos no dia.
